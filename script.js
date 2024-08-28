@@ -64,4 +64,73 @@ function fetchAnalyticsSummary() {
 // Search and filter functionality
 document.getElementById('searchBar').addEventListener('input', fetchAssessments);
 document.getElementById('filterType').addEventListener('change', fetchAssessments);
-document.getElementById('sortOption').addEventListener('change', fetchAssessments)
+document.getElementById('sortOption').addEventListener('change', fetchAssessments);
+
+let questions = [];
+
+function addQuestion() {
+    const questionText = prompt('Enter the question text:');
+    const questionType = prompt('Enter the question type (multiple-choice, short answer, etc.):');
+    const questionOptions = prompt('Enter the options for the question (comma-separated):');
+
+    const question = {
+        text: questionText,
+        type: questionType,
+        options: questionOptions.split(',')
+    };
+
+    questions.push(question);
+    displayQuestions();
+}
+
+function displayQuestions() {
+    const questionList = document.getElementById('questionList');
+    questionList.innerHTML = '';
+    questions.forEach((question, index) => {
+        const item = document.createElement('div');
+        item.className = 'question-item';
+        item.innerHTML = `
+            <h4>Question ${index + 1}</h4>
+            <p>${question.text}</p>
+            <p>Type: ${question.type}</p>
+            <p>Options: ${question.options.join(', ')}</p>
+        `;
+        questionList.appendChild(item);
+    });
+}
+
+function previewAssessment() {
+    alert('Preview Assessment');
+    // Preview functionality can be implemented here
+}
+
+function saveAssessment(status) {
+    const assessment = {
+        title: document.getElementById('assessmentTitle').value,
+        type: document.getElementById('assessmentType').value,
+        questions: questions,
+        gradingOptions: document.getElementById('gradingOptions').value,
+        instructions: document.getElementById('instructions').value,
+        timeLimit: document.getElementById('timeLimit').value,
+        attempts: document.getElementById('attempts').value,
+        feedbackOptions: document.getElementById('feedbackOptions').value,
+        courseLink: document.getElementById('courseLink').value,
+        status: status
+    };
+
+    fetch('/save-assessment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(assessment)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Assessment ${status ==='publish' ? 'Published' : 'Saved as Draft'} Successfully`);
+        } else {
+            alert('Error Saving Assessment');
+        }
+    });
+}
